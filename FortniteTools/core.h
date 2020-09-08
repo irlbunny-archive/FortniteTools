@@ -100,13 +100,17 @@ static bool bStreamInitialized;
 
 static void* ProcessEventHook(UObject* Object, UObject* Function, void* Params)
 {
+        
     if (Object && Function)
     {
-        if (GetObjectFirstName(Function).find(L"SendClientHello") != std::string::npos)
+        auto objectName = GetObjectFirstName(Object);
+        auto funcName = GetObjectFirstName(Function);
+            
+        if (funcName.find(L"SendClientHello") != std::string::npos)
             return NULL;
-        if (GetObjectFirstName(Function).find(L"SendPacketToServer") != std::string::npos)
+        if (funcName.find(L"SendPacketToServer") != std::string::npos)
             return NULL;
-        if (GetObjectFirstName(Function).find(L"SendPacketToClient") != std::string::npos)
+        if (funcName.find(L"SendPacketToClient") != std::string::npos)
             return NULL;
 
         std::wstring sValue = L"Object = " + GetObjectName(Object) + L", Function = " + GetObjectName(Function);
