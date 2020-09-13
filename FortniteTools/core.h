@@ -103,17 +103,17 @@ static void* ProcessEventHook(UObject* Object, UObject* Function, void* Params)
         
     if (Object && Function)
     {
-        auto objectName = GetObjectFirstName(Object);
-        auto funcName = GetObjectFirstName(Function);
+        std::wstring sObjectName = GetObjectFirstName(Object);
+        std::wstring sFunctionName = GetObjectFirstName(Function);
             
-        if (funcName.find(L"SendClientHello") != std::string::npos)
+        if (sFunctionName.find(L"SendClientHello") != std::string::npos)
             return NULL;
-        if (funcName.find(L"SendPacketToServer") != std::string::npos)
+        if (sFunctionName.find(L"SendPacketToServer") != std::string::npos)
             return NULL;
-        if (funcName.find(L"SendPacketToClient") != std::string::npos)
+        if (sFunctionName.find(L"SendPacketToClient") != std::string::npos)
             return NULL;
 
-        std::wstring sValue = L"Object = " + GetObjectName(Object) + L", Function = " + GetObjectName(Function);
+        std::wstring sValue = L"Object = " + sObjectName + L", Function = " + sFunctionName;
 
         if (std::find(cache.begin(), cache.end(), sValue) == cache.end())
         {

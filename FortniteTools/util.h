@@ -38,17 +38,11 @@ public:
         freopen_s(&pFile, "CONOUT$", "w", stdout);
     }
 
-    // TODO: These patterns will need to be updated depending on the version.
+    // TODO(Cyuubi): These patterns will need to be updated depending on the version.
     static VOID InitCore()
     {
 #if defined(UE32_4_12)
-        auto pGEngineOffset = FindPattern
-        (
-            "\x83\xC4\x14\x8B\x0D\x00\x00\x00\x00\x56\x8B\x01",
-            "xxxxx????xxx"
-        );
-
-        auto pGEngineAddress = (pGEngineOffset + 5 + *reinterpret_cast<int32_t*>(pGEngineOffset + 1)) + 2;
+        auto pGEngineAddress = BaseAddress() + 0x2E67DD8; // FIXME(Cyuubi): Hardcoded address for 0.6.5.
 
         auto pStaticConstructObject_InternalOffset = FindPattern
         (

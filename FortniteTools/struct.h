@@ -71,18 +71,6 @@ struct UClass
     // TODO
 };
 
-#if defined (UE32_4_12)
-// FIXME(Cyuubi): Probably incorrect.
-struct UObject
-{
-	char		Unk00[0x4];		// 0x0000
-	int			ObjectFlags;	// 0x0004
-	int			InternalIndex;	// 0x0008
-	UClass*		ClassPrivate;	// 0x000C
-	char		Unk01[0x4];		// 0x0010
-	UObject*	OuterPrivate;	// 0x0014
-};
-#else
 struct UObject
 {
 	char			Unk00[0x8];		// 0x0000
@@ -92,7 +80,6 @@ struct UObject
 	char			Unk01[0x8];		// 0x0020
 	UObject*		OuterPrivate;	// 0x0028
 };
-#endif
 
 struct UConsole
 {
@@ -123,8 +110,8 @@ struct UEngine
 {
     char                    Unk00[0x90];    // 0x0000
     UClass*                 ConsoleClass;   // 0x0090
-    char                    Unk01[0x408];   // 0x0094
-    UGameViewportClient*    GameViewport;   // 0x049C
+    char                    Unk01[0x398];   // 0x0094
+    UGameViewportClient*    GameViewport;   // 0x042C
 };
 #elif defined(UE64_4_23)
 struct UEngine
