@@ -26,16 +26,18 @@ DWORD WINAPI Main(LPVOID lpParam)
 #ifdef PROCESSEVENT_HOOK
     printf("Initializing ProcessEvent... ");
 
-    Core::InitProcessEvent();
-
-    printf("Success!\n");
+    if (Core::InitProcessEvent())
+        printf("Success!\n");
+    else
+        printf("Failed.\n");
 #endif // PROCESSEVENT_HOOK
 
-    printf("Initializing console... ");
+    printf("Initializing Console... ");
 
-    Core::InitConsole();
-
-    printf("Success, you can press \"`\" to bring up console!\n\n");
+    if (Core::InitConsole())
+        printf("Success, you can press \"`\" to bring up Console!\n\n");
+    else
+        printf("Failed, Console is already initialized.\n\n");
 
     return NULL;
 }

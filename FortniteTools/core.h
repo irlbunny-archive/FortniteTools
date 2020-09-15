@@ -140,8 +140,11 @@ static void* ProcessEventHook(UObject* Object, UObject* Function, void* Params)
 class Core
 {
 public:
-    static VOID InitConsole()
+    static BOOL InitConsole()
     {
+        if (GEngine->GameViewport->ViewportConsole)
+            return FALSE;
+
         auto pConsole = reinterpret_cast<UConsole*>(StaticConstructObject_Internal
         (
                 GEngine->ConsoleClass
@@ -158,11 +161,13 @@ public:
         ));
 
         GEngine->GameViewport->ViewportConsole = pConsole;
+
+        return TRUE;
     }
 
-    static VOID InitProcessEvent()
+    static BOOL InitProcessEvent()
     {
-        // TODO
+        return TRUE; // TODO
     }
 };
 
