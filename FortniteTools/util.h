@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include <minhook.h>
-#if defined(WIN32)
+#if defined(UE32_4_12)
 #pragma comment(lib, "libMinHook.x86.lib")
 #else
 #pragma comment(lib, "libMinHook.x64.lib")
@@ -23,7 +23,9 @@ private:
         for (auto value = static_cast<PBYTE>(pBuffer); *lpMask; ++lpPattern, ++lpMask, ++value)
         {
             if (*lpMask == 'x' && *reinterpret_cast<LPCBYTE>(lpPattern) != *value)
+            {
                 return false;
+            }
         }
 
         return true;
@@ -52,7 +54,27 @@ public:
 
         auto pStaticConstructObject_InternalAddress = pStaticConstructObject_InternalOffset + 5 + *reinterpret_cast<int32_t*>(pStaticConstructObject_InternalOffset + 1);
 
-        // TODO(Cyuubi): PROCESSEVENT_HOOK
+#ifdef PROCESSEVENT_HOOK
+        auto pFree_InternalOffset = FindPattern
+        (
+            "\xE8\x00\x00\x00\x00\xFF\x76\xB0",
+            "x????xxx"
+        );
+
+        auto pFree_InternalAddress = pFree_InternalOffset + 5 + *reinterpret_cast<int32_t*>(pFree_InternalOffset + 1);
+
+        auto pGetObjectName_InternalAddress = FindPattern
+        (
+            "\x8B\x4C\x24\x08\x83\xEC\x08\x56\x8B\x74\x24\x10\x85\xC9\x75\x4E",
+            "xxxxxxxxxxxxxxxx"
+        );
+
+        auto pProcessEventAddress = FindPattern
+        (
+            "\x55\x8B\xEC\x81\xEC\x00\x00\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xFC\x56\x8B\xF1\x8B\x4D\x0C\x57\x8B\x7D\x08\x89\x75\x8C",
+            "xxxxx????x????xxxxxxxxxxxxxxxxxx"
+        );
+#endif // PROCESSEVENT_HOOK
 #elif defined(UE64_4_23)
         auto pGEngineOffset = FindPattern
         (
@@ -168,12 +190,17 @@ public:
             ExitProcess(EXIT_FAILURE);
         }
 
-        // Temporary.
+        // FIXME(Cyuubi): This is temporary, it should be moved into InitProcessEvent.
         MH_Initialize();
 
         MH_CreateHook(pProcessEventAddress, ProcessEventHook, reinterpret_cast<PVOID*>(&ProcessEvent));
         MH_EnableHook(pProcessEventAddress);
 #endif // PROCESSEVENT_HOOK
+    }
+
+    static uintptr_t BaseAddress()
+    {
+        return reinterpret_cast<uintptr_t>(GetModuleHandle(0));
     }
 
     static PBYTE FindPattern(PVOID pBase, DWORD dwSize, LPCSTR lpPattern, LPCSTR lpMask)
@@ -185,7 +212,9 @@ public:
             auto pAddress = static_cast<PBYTE>(pBase) + i;
 
             if (MaskCompare(pAddress, lpPattern, lpMask))
+            {
                 return pAddress;
+            }
         }
 
         return NULL;
@@ -193,16 +222,10 @@ public:
 
     static PBYTE FindPattern(LPCSTR lpPattern, LPCSTR lpMask)
     {
-        MODULEINFO info = { 0 };
-
+        MODULEINFO info{};
         GetModuleInformation(GetCurrentProcess(), GetModuleHandle(0), &info, sizeof(info));
 
         return FindPattern(info.lpBaseOfDll, info.SizeOfImage, lpPattern, lpMask);
-    }
-
-    static uintptr_t BaseAddress()
-    {
-        return reinterpret_cast<uintptr_t>(GetModuleHandle(0));
     }
 };
 

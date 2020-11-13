@@ -4,10 +4,7 @@
 #include "build.h"
 
 #include <windows.h>
-#include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
 
 #include "struct.h"
 
@@ -19,16 +16,11 @@ typedef UObject* (__cdecl* fStaticConstructObject_Internal)
 typedef UObject* (__fastcall* fStaticConstructObject_Internal)
 #endif
 (
-        UClass*         Class
+        void*           Class   // (Missing: UClass)
     ,   UObject*        InOuter
     ,   void*           Name
-#if defined(UE32_4_12)
     ,   int             SetFlags
     ,   unsigned int    InternalSetFlags
-#else
-    ,   long            SetFlags
-    ,   long            InternalSetFlags
-#endif
     ,   UObject*        Template
     ,   bool            bCopyTransientsFromClassDefaults
     ,   void*           InstanceGraph
@@ -40,7 +32,11 @@ typedef UObject* (__fastcall* fStaticConstructObject_Internal)
 static fStaticConstructObject_Internal StaticConstructObject_Internal;
 
 // NOTE(Cyuubi): Dunno what this is actually called, but it works.
-typedef void* (_fastcall* fFree_Internal)
+#if defined(UE32_4_12)
+typedef void (__cdecl* fFree_Internal)
+#else
+typedef void (__fastcall* fFree_Internal)
+#endif
 (
     void* Buffer
 );
@@ -48,7 +44,11 @@ typedef void* (_fastcall* fFree_Internal)
 static fFree_Internal Free_Internal;
 
 // NOTE(Cyuubi): Dunno what this is actually called, but it works.
-typedef FString(_fastcall* fGetObjectName_Internal)
+#if defined(UE32_4_12)
+typedef FString (__cdecl* fGetObjectName_Internal)
+#else
+typedef FString (__fastcall* fGetObjectName_Internal)
+#endif
 (
     UObject* Object
 );
@@ -57,34 +57,40 @@ static fGetObjectName_Internal GetObjectName_Internal;
 
 static std::wstring GetObjectFirstName(UObject* Object)
 {
-    wchar_t* buffer = GetObjectName_Internal(Object).c_str();
-    if (!buffer)
-        return L"";
+    std::wstring sName(L"");
 
-    std::wstring name(buffer);
+    FString objName = GetObjectName_Internal(Object);
 
-    Free_Internal(buffer);
+    if (objName.IsValid())
+    {
+        sName = objName.c_str();
 
-    return name;
-}
-
-std::wstring GetObjectName(UObject* Object) {
-    std::wstring name(L"");
-
-    for (auto i = 0; Object; Object = Object->OuterPrivate, ++i) {
-        wchar_t* buffer = GetObjectName_Internal(Object).c_str();
-        if (!buffer)
-            break;
-
-        name = buffer + std::wstring(i > 0 ? L"." : L"") + name;
-
-        Free_Internal(buffer);
+        Free_Internal(objName.c_str());
     }
 
-    return name;
+    return sName;
 }
 
-typedef void* (_fastcall* fProcessEvent)
+static std::wstring GetObjectName(UObject* Object)
+{
+    std::wstring sName(L"");
+
+    for (auto i = 0; Object; Object = Object->OuterPrivate, ++i)
+    {
+        FString objName = GetObjectName_Internal(Object);
+
+        if (objName.IsValid())
+        {
+            sName = objName.c_str() + std::wstring(i > 0 ? L"." : L"") + sName;
+
+            Free_Internal(objName.c_str());
+        }
+    }
+
+    return sName;
+}
+
+typedef void* (__fastcall* fProcessEvent)
 (
         UObject*    Object
     ,   UObject*    Function
@@ -93,45 +99,26 @@ typedef void* (_fastcall* fProcessEvent)
 
 static fProcessEvent ProcessEvent;
 
-static std::vector<std::wstring> cache;
-static std::ofstream stream;
-
-static bool bStreamInitialized;
-
+// Sigh... Thank you, 32-bit. For nothing, xD.
+#if defined(UE32_4_12)
+static void* __fastcall ProcessEventHook(UObject* Object, UObject* Function, void* Params)
+#else
 static void* ProcessEventHook(UObject* Object, UObject* Function, void* Params)
+#endif
 {
-        
     if (Object && Function)
     {
-        std::wstring sObjectName = GetObjectFirstName(Object);
-        std::wstring sFunctionName = GetObjectFirstName(Function);
+        std::wstring sObjName = GetObjectFirstName(Object);
+        std::wstring sFuncName = GetObjectFirstName(Function);
             
-        if (sFunctionName.find(L"SendClientHello") != std::string::npos)
-            return NULL;
-        if (sFunctionName.find(L"SendPacketToServer") != std::string::npos)
-            return NULL;
-        if (sFunctionName.find(L"SendPacketToClient") != std::string::npos)
-            return NULL;
-
-        std::wstring sValue = L"Object = " + sObjectName + L", Function = " + sFunctionName;
-
-        if (std::find(cache.begin(), cache.end(), sValue) == cache.end())
+        if (sFuncName.find(L"SendClientHello") != std::string::npos ||
+            sFuncName.find(L"SendPacketToServer") != std::string::npos ||
+            sFuncName.find(L"SendPacketToClient") != std::string::npos)
         {
-            if (!bStreamInitialized)
-            {
-                stream = std::ofstream("ProcessEvent-Log.txt");
-
-                bStreamInitialized = true;
-            }
-
-            if (stream.is_open())
-            {
-                stream << std::string(sValue.begin(), sValue.end()) << "\n";
-                stream.flush();
-            }
-
-            cache.push_back(sValue);
+            return NULL;
         }
+
+        // TODO(Cyuubi): Re-add ProcessEvent logging, after it's been cleaned up and more refined.
     }
 
     return ProcessEvent(Object, Function, Params);
@@ -145,10 +132,10 @@ public:
         if (GEngine->GameViewport->ViewportConsole)
             return FALSE;
 
-        auto pConsole = reinterpret_cast<UConsole*>(StaticConstructObject_Internal
+        UObject* pConsole = StaticConstructObject_Internal
         (
                 GEngine->ConsoleClass
-            ,   reinterpret_cast<UObject*>(GEngine->GameViewport)
+            ,   GEngine->GameViewport
             ,   nullptr
             ,   0
             ,   0
@@ -158,9 +145,9 @@ public:
 #if defined(UE64_4_23) || defined(UE64_4_26)
             ,   false
 #endif
-        ));
+        );
 
-        GEngine->GameViewport->ViewportConsole = pConsole;
+        GEngine->GameViewport->ViewportConsole = static_cast<UConsole*>(pConsole);
 
         return TRUE;
     }

@@ -1,8 +1,8 @@
 #ifndef BUILD_H
 #define BUILD_H
 
-#define UE32_4_12 // Use UE 4.12 [32-bit] (Alpha) structs.
-//#define UE64_4_23 // Use UE 4.23 [64-bit] (Season 10) structs.
+//#define UE32_4_12 // Use UE 4.12 [32-bit] (Alpha) structs.
+#define UE64_4_23 // Use UE 4.23 [64-bit] (Season 10) structs.
 //#define UE64_4_26 // Use UE 4.26 [64-bit] (Season 13/14) structs.
 
 // Version:
