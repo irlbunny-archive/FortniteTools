@@ -130,7 +130,9 @@ public:
     static BOOL InitConsole()
     {
         if (GEngine->GameViewport->ViewportConsole)
+        {
             return FALSE;
+        }
 
         UObject* pConsole = StaticConstructObject_Internal
         (
