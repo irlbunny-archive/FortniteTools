@@ -49,6 +49,7 @@ public:
         }
 
 #ifndef UE32_4_12
+#ifndef UE64_4_20
         auto pGEngineOffset = FindPattern
         (
 #if defined(UE64_4_22) || defined(UE64_4_23)
@@ -66,9 +67,14 @@ public:
             ExitProcess(EXIT_FAILURE);
         }
 #endif
+#endif
 
+#if defined(UE32_4_12) || defined(UE64_4_20)
 #ifdef UE32_4_12
         auto pGEngineAddress = BaseAddress() + 0x2E67DD8; // FIXME(Cyuubi): Hardcoded address for 0.6.5.
+#else
+        auto pGEngineAddress = BaseAddress() + 0x49EF310; // FIXME(Cyuubi): Hardcoded address for 3.2.
+#endif
 
         if (!pGEngineAddress)
         {
@@ -88,6 +94,9 @@ public:
         (
 #ifdef UE32_4_12
             "\xE8\x00\x00\x00\x00\x0F\xB6\x53\x04",
+            "x????xxxx"
+#elif defined(UE64_4_20)
+            "\xE8\x00\x00\x00\x00\x41\x8D\x4D\x60",
             "x????xxxx"
 #elif defined(UE64_4_22) || defined(UE64_4_23)
             "\xE8\x00\x00\x00\x00\x44\x8D\x4D\x01",
