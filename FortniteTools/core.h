@@ -8,6 +8,13 @@
 
 #include "struct.h"
 
+#include <minhook.h>
+#if defined(UE32_4_12)
+#pragma comment(lib, "libMinHook.x86.lib")
+#else
+#pragma comment(lib, "libMinHook.x64.lib")
+#endif
+
 static UEngine* GEngine;
 
 #if defined(UE32_4_12)

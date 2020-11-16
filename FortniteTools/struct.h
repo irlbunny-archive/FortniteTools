@@ -22,7 +22,7 @@ struct UConsole : public UObject
 struct UScriptViewportClient : public UObject
 {
 public:
-#if defined (UE32_4_12)
+#ifdef UE32_4_12
     char    Unk00[0x4]; // 0x001C
 #else
     char    Unk00[0x10];    // 0x0028
@@ -33,7 +33,7 @@ public:
 struct UGameViewportClient : public UScriptViewportClient
 {
 public:
-#if defined (UE32_4_12)
+#ifdef UE32_4_12
     char        Unk01[0x4];         // 0x0020
     UConsole*   ViewportConsole;    // 0x0024
 #else
@@ -46,22 +46,22 @@ public:
 struct UEngine : public UObject
 {
 public:
-#if defined (UE32_4_12)
+#ifdef UE32_4_12
     char                    Unk01[0x7C];    // 0x001C
     void*                   ConsoleClass;   // 0x0090 (Missing: UClass)
     char                    Unk02[0x398];   // 0x0094
     UGameViewportClient*    GameViewport;   // 0x042C
-#elif defined (UE64_4_22)
+#elif defined(UE64_4_22)
     char                    Unk01[0xD0];    // 0x0028
     void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
     char                    Unk02[0x648];   // 0x0100
     UGameViewportClient*    GameViewport;   // 0x0748
-#elif defined (UE64_4_23)
+#elif defined(UE64_4_23)
     char                    Unk01[0xD0];    // 0x0028
     void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
     char                    Unk02[0x650];   // 0x0100
     UGameViewportClient*    GameViewport;   // 0x0750
-#elif defined (UE64_4_26)
+#elif defined(UE64_4_26)
     char                    Unk01[0xD0];    // 0x0028
     void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
     char                    Unk02[0x688];   // 0x0100

@@ -49,7 +49,6 @@ public:
         }
 
 #ifndef UE32_4_12
-        // GEngine Offset
         auto pGEngineOffset = FindPattern
         (
 #if defined(UE64_4_22) || defined(UE64_4_23)
@@ -68,9 +67,9 @@ public:
             ExitProcess(EXIT_FAILURE);
         }
 
-#if defined (UE32_4_12)
+#ifdef UE32_4_12
         auto pGEngineAddress = BaseAddress() + 0x2E67DD8; // FIXME(Cyuubi): Hardcoded address for 0.6.5.
-#elif defined (UE64_4_26)
+#elif defined(UE64_4_26)
         auto pGEngineAddress = pGEngineOffset + 22 + *reinterpret_cast<int32_t*>(pGEngineOffset + 18);
 #else
         auto pGEngineAddress = pGEngineOffset + 20 + *reinterpret_cast<int32_t*>(pGEngineOffset + 16);
@@ -79,10 +78,9 @@ public:
         GEngine = *reinterpret_cast<UEngine**>(pGEngineAddress);
 
 #ifndef UE64_4_26
-        // StaticConstructObject_Internal Offset
         auto pStaticConstructObject_InternalOffset = FindPattern
         (
-#if defined (UE32_4_16)
+#ifdef UE32_4_12
             "\xE8\x00\x00\x00\x00\x0F\xB6\x53\x04",
             "x????xxxx"
 #elif defined(UE64_4_22) || defined(UE64_4_23)
@@ -91,7 +89,6 @@ public:
 #endif
         );
 
-        // StaticConstructObject_Internal Address
         auto pStaticConstructObject_InternalAddress = pStaticConstructObject_InternalOffset + 5 + *reinterpret_cast<int32_t*>(pStaticConstructObject_InternalOffset + 1);
 #else
         auto pStaticConstructObject_InternalAddress = FindPattern
@@ -110,13 +107,7 @@ public:
         StaticConstructObject_Internal = reinterpret_cast<fStaticConstructObject_Internal>(pStaticConstructObject_InternalAddress);
 
 #ifdef PROCESSEVENT_HOOK
-#ifndef UE32_4_12
-        auto pFree_InternalAddress = FindPattern
-        (
-            "\x48\x85\xC9\x74\x2E\x53\x48\x83\xEC\x20\x48\x8B\xD9\x48\x8B\x0D\x00\x00\x00\x00\x48\x85\xC9\x75\x0C",
-            "xxxxxxxxxxxxxxxx????xxxxx"
-        );
-#else
+#ifdef UE32_4_12
         auto pFree_InternalOffset = FindPattern
         (
             "\xE8\x00\x00\x00\x00\xFF\x76\xB0",
@@ -124,6 +115,12 @@ public:
         );
 
         auto pFree_InternalAddress = pFree_InternalOffset + 5 + *reinterpret_cast<int32_t*>(pFree_InternalOffset + 1);
+#else
+        auto pFree_InternalAddress = FindPattern
+        (
+            "\x48\x85\xC9\x74\x2E\x53\x48\x83\xEC\x20\x48\x8B\xD9\x48\x8B\x0D\x00\x00\x00\x00\x48\x85\xC9\x75\x0C",
+            "xxxxxxxxxxxxxxxx????xxxxx"
+        );
 #endif
 
         if (!pFree_InternalAddress)
@@ -136,7 +133,7 @@ public:
 
         auto pGetObjectName_InternalAddress = FindPattern
         (
-#if defined (UE32_4_12)
+#ifdef UE32_4_12
             "\x8B\x4C\x24\x08\x83\xEC\x08\x56\x8B\x74\x24\x10\x85\xC9\x75\x4E",
             "xxxxxxxxxxxxxxxx"
 #elif defined(UE64_4_22) || defined(UE64_4_23)
@@ -156,9 +153,9 @@ public:
 
         GetObjectName_Internal = reinterpret_cast<fGetObjectName_Internal>(pGetObjectName_InternalAddress);
 
-        pProcessEventAddress = FindPattern
+        auto pProcessEventAddress = FindPattern
         (
-#if defined (UE32_4_12)
+#ifdef UE32_4_12
             "\x55\x8B\xEC\x81\xEC\x00\x00\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xFC\x56\x8B\xF1\x8B\x4D\x0C\x57\x8B\x7D\x08\x89\x75\x8C",
             "xxxxx????x????xxxxxxxxxxxxxxxxxx"
 #else
