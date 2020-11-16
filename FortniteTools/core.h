@@ -24,7 +24,7 @@ typedef UObject* (__fastcall* fStaticConstructObject_Internal)
     ,   UObject*        Template
     ,   bool            bCopyTransientsFromClassDefaults
     ,   void*           InstanceGraph
-#if defined(UE64_4_23) || defined(UE64_4_26)
+#if defined(UE64_4_22) || defined(UE64_4_23) || defined(UE64_4_26) 
     ,   bool            bAssumeTemplateIsArchetype
 #endif
 );
@@ -144,7 +144,7 @@ public:
             ,   nullptr
             ,   false
             ,   nullptr
-#if defined(UE64_4_23) || defined(UE64_4_26)
+#if defined(UE64_4_22) || defined(UE64_4_23) || defined(UE64_4_26)
             ,   false
 #endif
         );
