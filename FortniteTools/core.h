@@ -90,6 +90,8 @@ static std::wstring GetObjectName(UObject* Object)
     return sName;
 }
 
+static PBYTE pProcessEventAddress;
+
 typedef void* (__fastcall* fProcessEvent)
 (
         UObject*    Object
@@ -156,7 +158,13 @@ public:
 
     static BOOL InitProcessEvent()
     {
-        return TRUE; // TODO
+        if (MH_CreateHook(pProcessEventAddress, ProcessEventHook, reinterpret_cast<PVOID*>(&ProcessEvent)) &&
+            MH_EnableHook(pProcessEventAddress))
+        {
+            return FALSE;
+        }
+
+        return TRUE;
     }
 };
 

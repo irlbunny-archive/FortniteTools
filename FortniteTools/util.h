@@ -42,28 +42,41 @@ public:
 
     static VOID InitCore() 
     {
+        if (MH_Initialize())
+        {
+            MessageBox(0, L"Failed to initialize MinHook, exiting...", L"Error", MB_ICONERROR);
+            ExitProcess(EXIT_FAILURE);
+        }
+
 #ifndef UE32_4_12
         // GEngine Offset
         auto pGEngineOffset = FindPattern
         (
-#if defined(UE64_4_22) || defined(UE64_4_23) || defined(UE64_4_26) && !defined(S14_OFFSETS)
+#if defined(UE64_4_22) || defined(UE64_4_23)
             "\x48\x8B\xD3\x00\x00\x00\x00\x00\x48\x8B\x4C\x24\x40\x48\x89\x05\x00\x00\x00\x00\x48\x85\xC9",
             "xxx?????xxxxxxxx????xxx"
-#elif defined(UE64_4_26) && defined(S14_OFFSETS)
+#elif defined(UE64_4_26)
             "\x48\x89\x74\x24\x20\xE8\x00\x00\x00\x00\x48\x8B\x4C\x24\x40\x48\x89\x05",
             "xxxxxx????xxxxxxxx"
 #endif
         );
 #endif
 
-        //  GEngine Address
+        if (!pGEngineOffset)
+        {
+            MessageBox(0, L"Invalid GEngine offset, exiting...", L"Error", MB_ICONERROR);
+            ExitProcess(EXIT_FAILURE);
+        }
+
 #if defined (UE32_4_12)
         auto pGEngineAddress = BaseAddress() + 0x2E67DD8; // FIXME(Cyuubi): Hardcoded address for 0.6.5.
-#elif defined (S14_OFFSETS)
+#elif defined (UE64_4_26)
         auto pGEngineAddress = pGEngineOffset + 22 + *reinterpret_cast<int32_t*>(pGEngineOffset + 18);
 #else
         auto pGEngineAddress = pGEngineOffset + 20 + *reinterpret_cast<int32_t*>(pGEngineOffset + 16);
 #endif
+
+        GEngine = *reinterpret_cast<UEngine**>(pGEngineAddress);
 
 #ifndef UE64_4_26
         // StaticConstructObject_Internal Offset
@@ -88,20 +101,16 @@ public:
         );
 #endif
 
-        // Sets GEngine
-        GEngine = *reinterpret_cast<UEngine**>(pGEngineAddress);
-
         if (!pStaticConstructObject_InternalAddress)
         {
             MessageBox(0, L"Invalid StaticConstructObject_Internal address, exiting...", L"Error", MB_ICONERROR);
             ExitProcess(EXIT_FAILURE);
         }
 
-        // Sets StaticConstructObject_Internal
         StaticConstructObject_Internal = reinterpret_cast<fStaticConstructObject_Internal>(pStaticConstructObject_InternalAddress);
 
 #ifdef PROCESSEVENT_HOOK
-#ifndef UE32_4_16
+#ifndef UE32_4_12
         auto pFree_InternalAddress = FindPattern
         (
             "\x48\x85\xC9\x74\x2E\x53\x48\x83\xEC\x20\x48\x8B\xD9\x48\x8B\x0D\x00\x00\x00\x00\x48\x85\xC9\x75\x0C",
@@ -117,9 +126,17 @@ public:
         auto pFree_InternalAddress = pFree_InternalOffset + 5 + *reinterpret_cast<int32_t*>(pFree_InternalOffset + 1);
 #endif
 
+        if (!pFree_InternalAddress)
+        {
+            MessageBox(0, L"Invalid Free_Internal address, exiting...", L"Error", MB_ICONERROR);
+            ExitProcess(EXIT_FAILURE);
+        }
+
+        Free_Internal = reinterpret_cast<fFree_Internal>(pFree_InternalAddress);
+
         auto pGetObjectName_InternalAddress = FindPattern
         (
-#if defined (UE32_4_16)
+#if defined (UE32_4_12)
             "\x8B\x4C\x24\x08\x83\xEC\x08\x56\x8B\x74\x24\x10\x85\xC9\x75\x4E",
             "xxxxxxxxxxxxxxxx"
 #elif defined(UE64_4_22) || defined(UE64_4_23)
@@ -131,25 +148,6 @@ public:
 #endif
         );
 
-        auto pProcessEventAddress = FindPattern
-        (
-#if defined (UE32_4_16)
-            "\x55\x8B\xEC\x81\xEC\x00\x00\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xFC\x56\x8B\xF1\x8B\x4D\x0C\x57\x8B\x7D\x08\x89\x75\x8C",
-            "xxxxx????x????xxxxxxxxxxxxxxxxxx"
-#else
-            "\x40\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xEC\x00\x00\x00\x00\x48\x8D\x6C\x24\x00\x48\x89\x9D\x00\x00\x00\x00\x48\x8B\x05\x00\x00\x00\x00\x48\x33\xC5\x48\x89\x85\x00\x00\x00\x00\x8B\x41\x0C\x45\x33\xF6\x3B\x05\x00\x00\x00\x00\x4D\x8B\xF8\x48\x8B\xF2\x4C\x8B\xE1\x41\xB8\x00\x00\x00\x00\x7D\x2A",
-            "xxxxxxxxxxxxxxx????xxxx?xxx????xxx????xxxxxx????xxxxxxxx????xxxxxxxxxxx????xx"
-#endif
-        );
-
-        if (!pFree_InternalAddress)
-        {
-            MessageBox(0, L"Invalid Free_Internal address, exiting...", L"Error", MB_ICONERROR);
-            ExitProcess(EXIT_FAILURE);
-        }
-
-        Free_Internal = reinterpret_cast<fFree_Internal>(pFree_InternalAddress);
-
         if (!pGetObjectName_InternalAddress)
         {
             MessageBox(0, L"Invalid GetObjectName_Internal address, exiting...", L"Error", MB_ICONERROR);
@@ -158,17 +156,22 @@ public:
 
         GetObjectName_Internal = reinterpret_cast<fGetObjectName_Internal>(pGetObjectName_InternalAddress);
 
+        pProcessEventAddress = FindPattern
+        (
+#if defined (UE32_4_12)
+            "\x55\x8B\xEC\x81\xEC\x00\x00\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xFC\x56\x8B\xF1\x8B\x4D\x0C\x57\x8B\x7D\x08\x89\x75\x8C",
+            "xxxxx????x????xxxxxxxxxxxxxxxxxx"
+#else
+            "\x40\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xEC\x00\x00\x00\x00\x48\x8D\x6C\x24\x00\x48\x89\x9D\x00\x00\x00\x00\x48\x8B\x05\x00\x00\x00\x00\x48\x33\xC5\x48\x89\x85\x00\x00\x00\x00\x8B\x41\x0C\x45\x33\xF6\x3B\x05\x00\x00\x00\x00\x4D\x8B\xF8\x48\x8B\xF2\x4C\x8B\xE1\x41\xB8\x00\x00\x00\x00\x7D\x2A",
+            "xxxxxxxxxxxxxxx????xxxx?xxx????xxx????xxxxxx????xxxxxxxx????xxxxxxxxxxx????xx"
+#endif
+        );
+
         if (!pProcessEventAddress)
         {
             MessageBox(0, L"Invalid ProcessEvent address, exiting...", L"Error", MB_ICONERROR);
             ExitProcess(EXIT_FAILURE);
         }
-
-        // FIXME(Cyuubi): This is temporary, it should be moved into InitProcessEvent.
-        MH_Initialize();
-
-        MH_CreateHook(pProcessEventAddress, ProcessEventHook, reinterpret_cast<PVOID*>(&ProcessEvent));
-        MH_EnableHook(pProcessEventAddress);
 #endif // PROCESSEVENT_HOOK
     }
 

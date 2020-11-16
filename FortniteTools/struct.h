@@ -25,7 +25,7 @@ public:
 #if defined (UE32_4_12)
     char    Unk00[0x4]; // 0x001C
 #else
-    char    Unk00[0x10]; // 0x0028
+    char    Unk00[0x10];    // 0x0028
 #endif
 };
 
@@ -38,7 +38,7 @@ public:
     UConsole*   ViewportConsole;    // 0x0024
 #else
     char        Unk01[0x8];         // 0x0030
-    UConsole* ViewportConsole;      // 0x0040
+    UConsole*   ViewportConsole;    // 0x0040
 #endif
 };
 
@@ -53,19 +53,19 @@ public:
     UGameViewportClient*    GameViewport;   // 0x042C
 #elif defined (UE64_4_22)
     char                    Unk01[0xD0];    // 0x0028
-    void* ConsoleClass;                     // 0x00F8 (Missing: UClass)
+    void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
     char                    Unk02[0x648];   // 0x0100
-    UGameViewportClient* GameViewport;      // 0x0748
+    UGameViewportClient*    GameViewport;   // 0x0748
 #elif defined (UE64_4_23)
     char                    Unk01[0xD0];    // 0x0028
-    void* ConsoleClass;                     // 0x00F8 (Missing: UClass)
+    void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
     char                    Unk02[0x650];   // 0x0100
-    UGameViewportClient* GameViewport;      // 0x0750
+    UGameViewportClient*    GameViewport;   // 0x0750
 #elif defined (UE64_4_26)
     char                    Unk01[0xD0];    // 0x0028
-    void* ConsoleClass;                     // 0x00F8 (Missing: UClass)
+    void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
     char                    Unk02[0x688];   // 0x0100
-    UGameViewportClient* GameViewport;      // 0x0788
+    UGameViewportClient*    GameViewport;   // 0x0788
 #endif
 };
 
