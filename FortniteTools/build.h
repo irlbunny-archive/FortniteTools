@@ -20,6 +20,6 @@
 #endif
 
 // Options:
-#define PROCESSEVENT_HOOK // Use ProcessEvent hook.
+//#define PROCESSEVENT_HOOK // Use ProcessEvent hook.
 
 #endif // BUILD_H
