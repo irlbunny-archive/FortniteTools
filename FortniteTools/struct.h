@@ -19,64 +19,55 @@ struct UConsole : public UObject
     // TODO
 };
 
-#if defined (UE32_4_12)
 struct UScriptViewportClient : public UObject
 {
 public:
+#if defined (UE32_4_12)
     char    Unk00[0x4]; // 0x001C
-};
 #else
-struct UScriptViewportClient : public UObject
-{
-public:
     char    Unk00[0x10]; // 0x0028
-};
 #endif
+};
 
-#if defined (UE32_4_12)
+
 struct UGameViewportClient : public UScriptViewportClient
 {
 public:
+#if defined (UE32_4_12)
     char        Unk01[0x4];         // 0x0020
     UConsole*   ViewportConsole;    // 0x0024
-};
 #else
-struct UGameViewportClient : public UScriptViewportClient
-{
-public:
     char        Unk01[0x8];         // 0x0030
-    UConsole*   ViewportConsole;    // 0x0040
-};
+    UConsole* ViewportConsole;      // 0x0040
 #endif
+};
 
-#if defined (UE32_4_12)
+
 struct UEngine : public UObject
 {
 public:
+#if defined (UE32_4_12)
     char                    Unk01[0x7C];    // 0x001C
     void*                   ConsoleClass;   // 0x0090 (Missing: UClass)
     char                    Unk02[0x398];   // 0x0094
     UGameViewportClient*    GameViewport;   // 0x042C
-};
-#elif defined(UE64_4_23)
-struct UEngine : public UObject
-{
-public:
+#elif defined (UE64_4_22)
     char                    Unk01[0xD0];    // 0x0028
-    void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
+    void* ConsoleClass;                     // 0x00F8 (Missing: UClass)
+    char                    Unk02[0x648];   // 0x0100
+    UGameViewportClient* GameViewport;      // 0x0748
+#elif defined (UE64_4_23)
+    char                    Unk01[0xD0];    // 0x0028
+    void* ConsoleClass;                     // 0x00F8 (Missing: UClass)
     char                    Unk02[0x650];   // 0x0100
-    UGameViewportClient*    GameViewport;   // 0x0750
-};
-#elif defined(UE64_4_26)
-struct UEngine : public UObject
-{
-public:
+    UGameViewportClient* GameViewport;      // 0x0750
+#elif defined (UE64_4_26)
     char                    Unk01[0xD0];    // 0x0028
-    void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
+    void* ConsoleClass;                     // 0x00F8 (Missing: UClass)
     char                    Unk02[0x688];   // 0x0100
-    UGameViewportClient*    GameViewport;   // 0x0788
-};
+    UGameViewportClient* GameViewport;      // 0x0788
 #endif
+};
 
 template<class T>
 struct TArray

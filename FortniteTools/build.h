@@ -1,13 +1,16 @@
 #ifndef BUILD_H
 #define BUILD_H
 
-//#define UE32_4_12 // Use UE 4.12 [32-bit] (Alpha) structs.
-#define UE64_4_23 // Use UE 4.23 [64-bit] (Season 10) structs.
-//#define UE64_4_26 // Use UE 4.26 [64-bit] (Season 13/14) structs.
+//#define UE32_4_12 // Use UE 4.12 [32-bit] (Alpha 0.6.5) structs.
+//#define UE64_4_22 // Use UE 4.22 [64-bit] (Season 7/8-ish) structs.
+//#define UE64_4_23 // Use UE 4.23 [64-bit] (Season 10) structs.
+#define UE64_4_26 // Use UE 4.26 [64-bit] (Season 13/14) structs.
 
 // Version:
 #if defined(UE32_4_12)
 #define UE_VERSION "4.12 [32-bit]"
+#elif defined(UE64_4_22)
+#define UE_VERSION "4.22 [64-bit]"
 #elif defined(UE64_4_23)
 #define UE_VERSION "4.23 [64-bit]"
 #elif defined(UE64_4_26)
@@ -17,7 +20,7 @@
 #endif
 
 // Options:
-//#define S14_OFFSETS // Use Season 14 offsets for UE 4.26 [64-bit].
+#define S14_OFFSETS // Use Season 14 offsets for UE 4.26 [64-bit].
 //#define PROCESSEVENT_HOOK // Use ProcessEvent hook.
 
 #endif // BUILD_H
