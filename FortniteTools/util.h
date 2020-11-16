@@ -59,16 +59,22 @@ public:
             "xxxxxx????xxxxxxxx"
 #endif
         );
-#endif
 
         if (!pGEngineOffset)
         {
             MessageBox(0, L"Invalid GEngine offset, exiting...", L"Error", MB_ICONERROR);
             ExitProcess(EXIT_FAILURE);
         }
+#endif
 
 #ifdef UE32_4_12
         auto pGEngineAddress = BaseAddress() + 0x2E67DD8; // FIXME(Cyuubi): Hardcoded address for 0.6.5.
+
+        if (!pGEngineAddress)
+        {
+            MessageBox(0, L"Invalid GEngine address, exiting...", L"Error", MB_ICONERROR);
+            ExitProcess(EXIT_FAILURE);
+        }
 #elif defined(UE64_4_26)
         auto pGEngineAddress = pGEngineOffset + 22 + *reinterpret_cast<int32_t*>(pGEngineOffset + 18);
 #else
