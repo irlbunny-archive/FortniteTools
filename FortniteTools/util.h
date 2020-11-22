@@ -168,7 +168,7 @@ public:
 
         GetObjectName_Internal = reinterpret_cast<fGetObjectName_Internal>(pGetObjectName_InternalAddress);
 
-        auto pProcessEventAddress = FindPattern
+        pProcessEventAddress = FindPattern
         (
 #ifdef UE32_4_12
             "\x55\x8B\xEC\x81\xEC\x00\x00\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xFC\x56\x8B\xF1\x8B\x4D\x0C\x57\x8B\x7D\x08\x89\x75\x8C",

@@ -165,11 +165,8 @@ public:
 
     static BOOL InitProcessEvent()
     {
-        if (MH_CreateHook(pProcessEventAddress, ProcessEventHook, reinterpret_cast<PVOID*>(&ProcessEvent)) &&
-            MH_EnableHook(pProcessEventAddress))
-        {
-            return FALSE;
-        }
+        MH_CreateHook(pProcessEventAddress, ProcessEventHook, reinterpret_cast<PVOID*>(&ProcessEvent));
+        MH_EnableHook(pProcessEventAddress);
 
         return TRUE;
     }
