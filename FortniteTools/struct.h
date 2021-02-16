@@ -56,6 +56,11 @@ public:
     void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
     char                    Unk02[0x620];   // 0x0100
     UGameViewportClient*    GameViewport;   // 0x0720
+#elif defined(UE64_4_21)
+    char                    Unk01[0xD0];    // 0x0028
+    void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
+    char                    Unk02[0x621];   // 0x0100
+    UGameViewportClient*    GameViewport;   // 0x0720
 #elif defined(UE64_4_22)
     char                    Unk01[0xD0];    // 0x0028
     void*                   ConsoleClass;   // 0x00F8 (Missing: UClass)
